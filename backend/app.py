@@ -1,10 +1,10 @@
-from flask import Flask, jsonify
+from flask import Flask, render_template
 from routes.store import store_blueprint
 from routes.marketing import marketing_blueprint
 from config import Config
 from database import db
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")  # Specify the template folder
 app.config.from_object(Config)
 
 # Initialize database
@@ -16,7 +16,7 @@ app.register_blueprint(marketing_blueprint, url_prefix="/marketing")
 
 @app.route("/")
 def home():
-    return jsonify({"message": "Welcome to AutoShop AI - AI-Powered Shopify Store Generator"})
+    return render_template("index.html")  # Render the index.html template
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
