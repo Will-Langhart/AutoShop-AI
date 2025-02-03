@@ -1,1 +1,106 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AutoShop AI - AI-Powered Shopify Store Builder</title><link rel="stylesheet" href="/styles.css"><script defer="defer" src="/static/js/main.75aac6c1.js"></script><link href="/static/css/main.d509d863.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoShop AI - AI-Powered Shopify Store Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex justify-center items-center min-h-screen">
+
+    <div class="container max-w-2xl p-6 bg-gray-800 rounded-lg shadow-lg text-center">
+        <h1 class="text-3xl font-bold text-green-400">AutoShop AI</h1>
+        <p class="text-gray-400 mt-2">Create AI-powered Shopify stores & products in minutes!</p>
+
+        <!-- Store Creation Form -->
+        <div class="mt-6">
+            <h2 class="text-xl font-semibold">Create a New Shopify Store</h2>
+            <input type="text" id="storeName" placeholder="Store Name"
+                class="mt-2 w-full p-2 rounded-md bg-gray-700 text-white border border-gray-500 placeholder-gray-400">
+            <input type="email" id="ownerEmail" placeholder="Owner Email"
+                class="mt-2 w-full p-2 rounded-md bg-gray-700 text-white border border-gray-500 placeholder-gray-400">
+            <button onclick="createStore()" class="mt-3 px-6 py-2 bg-green-500 hover:bg-green-600 rounded-md text-white font-semibold">
+                Create Store
+            </button>
+            <div id="storeResult" class="mt-4 p-4 bg-gray-700 rounded-md hidden">
+                <h2 class="text-xl font-semibold">Store Created ✅</h2>
+                <p id="storeDetails" class="text-gray-300"></p>
+            </div>
+        </div>
+
+        <!-- Product Generation Form -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold">Generate AI-Powered Product Listings</h2>
+            <input type="text" id="storeId" placeholder="Enter Store ID"
+                class="mt-2 w-full p-2 rounded-md bg-gray-700 text-white border border-gray-500 placeholder-gray-400">
+            <textarea id="productNames" placeholder="Enter product names (comma-separated)" rows="2"
+                class="mt-2 w-full p-2 rounded-md bg-gray-700 text-white border border-gray-500 placeholder-gray-400"></textarea>
+            <button onclick="generateProducts()" class="mt-3 px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-md text-white font-semibold">
+                Generate Products
+            </button>
+            <div id="productResult" class="mt-4 p-4 bg-gray-700 rounded-md hidden">
+                <h2 class="text-xl font-semibold">Products Generated 🎉</h2>
+                <ul id="productList" class="text-gray-300 text-left"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store Creation API Call
+        async function createStore() {
+            const storeName = document.getElementById("storeName").value;
+            const ownerEmail = document.getElementById("ownerEmail").value;
+
+            if (!storeName || !ownerEmail) {
+                alert("Please enter a store name and email.");
+                return;
+            }
+
+            const response = await fetch("http://127.0.0.1:5002/store/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ store_name: storeName, owner_email: ownerEmail }),
+            });
+
+            const data = await response.json();
+            if (data.store_id) {
+                document.getElementById("storeResult").classList.remove("hidden");
+                document.getElementById("storeDetails").innerHTML =
+                    `📌 Store ID: <strong>${data.store_id}</strong><br> 🏪 Name: ${storeName}<br> 📧 Owner: ${ownerEmail}`;
+            } else {
+                alert("Failed to create store.");
+            }
+        }
+
+        // AI Product Generation API Call
+        async function generateProducts() {
+            const storeId = document.getElementById("storeId").value;
+            const productNames = document.getElementById("productNames").value.split(",");
+
+            if (!storeId || productNames.length === 0) {
+                alert("Please enter a store ID and at least one product name.");
+                return;
+            }
+
+            const response = await fetch("http://127.0.0.1:5002/store/products/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ store_id: storeId, product_names: productNames }),
+            });
+
+            const data = await response.json();
+            if (data.products) {
+                document.getElementById("productResult").classList.remove("hidden");
+                let productListHTML = "";
+                data.products.forEach((product) => {
+                    productListHTML += `<li>🛒 <strong>${product.name}</strong> - ${product.description} <br>
+                                        <img src="${product.image_url}" class="mt-2 rounded-md w-full max-w-xs"></li><br>`;
+                });
+                document.getElementById("productList").innerHTML = productListHTML;
+            } else {
+                alert("Failed to generate products.");
+            }
+        }
+    </script>
+</body>
+</html>
