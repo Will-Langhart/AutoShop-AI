@@ -10,13 +10,13 @@ app.config.from_object(Config)
 # Initialize database
 db.init_app(app)
 
-# Register Blueprints (modular routing)
-app.register_blueprint(store_blueprint, url_prefix="/store")
+# Register Blueprints
+app.register_blueprint(store_blueprint, url_prefix="/store")  # Ensure this is correct
 app.register_blueprint(marketing_blueprint, url_prefix="/marketing")
 
 @app.route("/")
 def home():
-    return render_template("index.html")  # Render the index.html template
+    return render_template("index.html")  # Serve the homepage
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
